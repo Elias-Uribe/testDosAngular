@@ -3,6 +3,8 @@ import { Post } from '../../interfaces/post.interface';
 import { PostsService } from '../../services/posts.service';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { SharedDataService } from '../../services/shared-data.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-home',
@@ -14,10 +16,31 @@ import { RouterModule } from '@angular/router';
 export class HomeComponent implements OnInit {
   arrPosts: Post[] = [];
 
-  constructor(private postsService: PostsService) {}
+  private subscription!: Subscription;
+
+  constructor(
+    private postsService: PostsService,
+    private sharedDataService: SharedDataService
+  ) {}
 
   ngOnInit(): void {
     this.getPosts();
+    this.getSearchPostsByName();
+  }
+
+  getSearchPostsByName(): void {
+    this.subscription = this.sharedDataService.data$.subscribe(
+      (data) => {
+        this.arrPosts = this.arrPosts.filter((p) => p.title.includes(data));
+      },
+      (error) => {
+        console.error('Error:', error);
+      }
+    );
+  }
+
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
   }
 
   async getPosts(): Promise<void> {
@@ -28,5 +51,16 @@ export class HomeComponent implements OnInit {
     } catch (error) {
       console.error('Error al obtener las publicaciones:', error);
     }
+  }
+
+  resumirTexto(texto: string, longitudMaxima: number = 100): string {
+    return texto.length > longitudMaxima
+      ? texto.slice(0, longitudMaxima) + '...'
+      : texto;
+  }
+
+  trackByFn(index: number, item: Post) {
+    //console.log(item.id)
+    return item.id; // unique id corresponding to the item
   }
 }

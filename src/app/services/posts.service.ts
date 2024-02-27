@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { lastValueFrom } from 'rxjs';
 import { Post } from '../interfaces/post.interface';
+import { Comment } from '../interfaces/comment.interface';
 
 @Injectable({
   providedIn: 'root',
