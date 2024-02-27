@@ -15,6 +15,7 @@ import { Subscription } from 'rxjs';
 })
 export class HomeComponent implements OnInit {
   arrPosts: Post[] = [];
+  originalPosts: Post[] = [];
 
   private subscription!: Subscription;
 
@@ -31,7 +32,13 @@ export class HomeComponent implements OnInit {
   getSearchPostsByName(): void {
     this.subscription = this.sharedDataService.data$.subscribe(
       (data) => {
-        this.arrPosts = this.arrPosts.filter((p) => p.title.includes(data));
+        if (data !== '') {
+          this.arrPosts = this.originalPosts.filter((p) =>
+            p.title.includes(data)
+          );
+        } else {
+          this.arrPosts = [...this.originalPosts];
+        }
       },
       (error) => {
         console.error('Error:', error);
@@ -46,8 +53,9 @@ export class HomeComponent implements OnInit {
   async getPosts(): Promise<void> {
     try {
       let response = await this.postsService.getPosts();
-      this.arrPosts = response.slice(0, 10);
-      console.log(this.arrPosts);
+      this.originalPosts = response.slice(0, 10);
+      this.arrPosts = [...this.originalPosts];
+      //console.log(this.arrPosts);
     } catch (error) {
       console.error('Error al obtener las publicaciones:', error);
     }
